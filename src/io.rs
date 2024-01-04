@@ -1,71 +1,125 @@
 #![allow(dead_code)]
 
-use std::process::exit;
-use console::{Key, Term};
 use crate::util::TwoOptions;
+use console::{Key, Term};
+use core::panic;
+use std::process::exit;
 
-pub fn wait_for_enter(term: &Term) {
-    'input_loop: loop {
+/// Clears the terminal.
+///
+/// ### Params
+///     * term: A referance to the terminal you would like to clear
+///
+/// ### Panics
+///     After five failed attempts to clear the terminal
+pub fn clear_screen(term: &Term) {
+    let err_msg: &str = "Failed to clear the terminal after five attempts.";
+
+    for _ in 0..5 {
+        match term.clear_screen() {
+            Ok(_) => return,
+            Err(_) => (),
+        }
+    }
+
+    panic!("{err_msg}");
+}
+
+/// Gets a character from the terminal
+///
+/// ### Params
+///   * term: A referance to the terminal you are reading from
+/// ### Panics
+///
+pub fn get_char(term: &Term) -> char {
+    let err_msg: &str = "Failed to read terminal after 5 attempts.";
+
+    for _ in 0..5 {
+        match term.read_char() {
+            Ok(char) => char,
+            Err(_) => continue,
+        };
+    }
+
+    panic!("{err_msg}");
+}
+
+pub fn get_key(term: &Term) -> Key {
+    let err_msg: &str = "Failed to read key after 5 attempts";
+
+    for _ in 0..5 {
         match term.read_key() {
-            Ok(key)    => if key == Key::Enter { break 'input_loop; },
-            Err(err) => panic!("Failed to read key [{}]", err)
+            Ok(key) => key,
+            Err(_) => continue,
+        };
+    }
+
+    panic!("{err_msg}");
+}
+
+/// Waits for the enter key to be pressed on the keyboard.
+/// This function is by nature blocking
+///
+/// ### Params
+///     * term: A referance to the terminal you are getting input from
+pub fn wait_for_enter(term: &Term) {
+    loop {
+        if get_key(term) == Key::Enter {
+            break;
         }
     }
 }
 
-fn confirm(stdout: &Term) -> bool {
-    stdout.clear_screen().unwrap();
+/// Asks the user to confirm an input.
+///
+/// ### Params
+///     * term: A referance to the terminal you are getting input from
+fn confirm(term: &Term) -> bool {
+    clear_screen(term);
 
     println!("Are you sure (Y/N)?");
 
     loop {
-        match stdout.read_char().unwrap() {
+        match get_char(term) {
             'q' => exit(0),
             'y' => return true,
             'n' => return false,
-            _   => stdout.clear_screen().unwrap(),
-
+            _ => (),
         };
     }
 }
 
-pub fn get_binary_input<T: TwoOptions<Output = T>>(stdout: &Term, msg: &str, keys: [char; 2], confirm_input: bool) -> T {
-    stdout.clear_screen().unwrap();
+/// Gets an input from the user that only has two possible choices
+///
+/// ### Parms
+///     * stdout: A referance to the terminal you are getting input from
+///     * msg: The message to diplay when obtaining user input
+///     * keys: The keys to represented the choice
+///     * confirm_input: Whether or not to confirm the user input
+pub fn get_binary_input<T: TwoOptions<Output = T>>(
+    term: &Term,
+    msg: &str,
+    keys: [char; 2],
+    confirm_input: bool,
+) -> T {
+    clear_screen(term);
 
     println!("{msg}");
 
-    let mut output: T;
-
     loop {
-        match stdout.read_char().unwrap() {
+        match get_char(term) {
             'q' => exit(0),
             k if k == keys[0] => {
-                output = T::option_one();
-
-                if !confirm_input { break; }
-
-                match confirm(stdout) {
-                    true  => break,
-                    false => continue
-                }
-            },
-            k if k == keys[1] => {
-                output = T::option_two();
-
-                if !confirm_input { break; }
-
-                match confirm(stdout) {
-                    true  => break,
-                    false => continue
+                if !confirm_input || confirm(term) {
+                    return T::option_one();
                 }
             }
-            _ => ()
+            k if k == keys[1] => {
+                if !confirm_input || confirm(term) {
+                    return T::option_two();
+                }
+            }
+            _ => (),
         }
     }
-
-    stdout.clear_screen().unwrap();
-
-    output
 }
-
-

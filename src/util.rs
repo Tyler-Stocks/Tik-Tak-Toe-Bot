@@ -1,3 +1,5 @@
+use console::Term;
+
 pub trait TwoOptions {
     type Output;
 
@@ -56,3 +58,4 @@ impl TwoOptions for bool {
         false
     }
 }
+
