@@ -1,16 +1,20 @@
-use console::Term;
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub enum Side {
+    X,
+    O,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub enum Turn {
+    You,
+    Cpu,
+}
 
 pub trait TwoOptions {
     type Output;
 
     fn option_one() -> Self::Output;
     fn option_two() -> Self::Output;
-}
-
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub enum Side {
-    X,
-    O
 }
 
 impl TwoOptions for Side {
@@ -27,14 +31,8 @@ impl TwoOptions for Side {
     }
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub enum StartPlayer {
-    You,
-    Cpu
-}
-
-impl TwoOptions for StartPlayer {
-    type Output = StartPlayer;
+impl TwoOptions for Turn {
+    type Output = Turn;
 
     /// Returns Self::You
     fn option_one() -> Self::Output {
@@ -58,4 +56,3 @@ impl TwoOptions for bool {
         false
     }
 }
-

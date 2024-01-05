@@ -25,6 +25,29 @@ pub fn clear_screen(term: &Term) {
     panic!("{err_msg}");
 }
 
+/// Gets a number from the terminal
+///
+/// ### Params
+///     * term: A referance to the terminal you are reading from
+pub fn get_num(term: &Term, msg: &str) -> u8 {
+    let mut user_input: char;
+
+    clear_screen(term);
+
+    println!("{msg}");
+
+    loop {
+        user_input = get_char(term);
+
+        if user_input.is_digit(10) {
+            match user_input.to_digit(10) {
+                Some(digit) => return digit as u8,
+                None => (),
+            }
+        }
+    }
+}
+
 /// Gets a character from the terminal
 ///
 /// ### Params
