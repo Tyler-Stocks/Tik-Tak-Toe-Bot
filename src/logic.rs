@@ -1,4 +1,4 @@
-use crate::{board::Board, util::Turn};
+use crate::{board::Board, util::core::Turn};
 
 pub fn do_computer_turn(board: &mut Board, turn_number: u8) {
     match turn_number {

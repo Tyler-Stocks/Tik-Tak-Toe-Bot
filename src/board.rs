@@ -1,24 +1,27 @@
 #![allow(dead_code)]
-use crate::util::{Side, Turn};
-
 use std::{
-    fmt::{Display, Formatter},
+    fmt::{Display, Formatter, Result},
     u8,
 };
 
+use crate::{
+    board::{TileState::Empty, TileState::Occupied},
+    util::core::{Side, Side::O, Side::X, Turn},
+};
+
+/// The current state of the tile on the board
 #[derive(Eq, PartialEq, Copy, Clone)]
 pub enum TileState {
-    X,
-    O,
+    Occupied(Side),
     Empty,
 }
 
 impl Display for TileState {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         match self {
-            TileState::X => write!(f, "State = X"),
-            TileState::O => write!(f, "State = O"),
-            TileState::Empty => write!(f, "State = Empty"),
+            Occupied(X) => write!(f, "State = Occupied(X)"),
+            Occupied(O) => write!(f, "State = Occupied(O)"),
+            Empty => write!(f, "State = Empty"),
         }
     }
 }
@@ -26,17 +29,17 @@ impl Display for TileState {
 impl TileState {
     pub fn value(&self) -> u8 {
         match self {
-            TileState::Empty => 0,
-            TileState::X => 1,
-            TileState::O => 2,
+            Empty => 0,
+            Occupied(X) => 1,
+            Occupied(O) => 2,
         }
     }
 }
 
 #[derive(Eq, PartialEq, Copy, Clone)]
 pub struct Tile {
-    pub id: u8,
-    pub state: TileState,
+    id: u8,
+    state: TileState,
 }
 
 impl Display for Tile {
@@ -114,13 +117,13 @@ impl Board {
 
     pub fn do_turn(&mut self, id: u8, side: Side) {
         match side {
-            Side::X => self.modify_tile_state(id, TileState::X),
-            Side::O => self.modify_tile_state(id, TileState::O),
+            X => self.modify_tile_state(id, Occupied(X)),
+            O => self.modify_tile_state(id, Occupied(O)),
         }
     }
 
     pub fn is_empty(&mut self, id: u8) -> bool {
-        self.get_tile_from_id(id).state == TileState::Empty
+        self.get_tile_from_id(id).state == Empty
     }
 
     pub fn modify_tile_state(&mut self, id: u8, state: TileState) {
@@ -153,4 +156,3 @@ impl Board {
         }
     }
 }
-

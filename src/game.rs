@@ -10,7 +10,7 @@ pub mod stages {
 
     use crate::board::Board;
     use crate::io::{clear_screen, get_binary_input, get_key, get_num, wait_for_enter};
-    use crate::util::{Side, Turn, TwoOptions};
+    use crate::util::core::{Side, Turn, TwoOptions};
 
     fn do_player_turn(term: &Term, board: &mut Board, side: Side) {
         let msg: &str =
