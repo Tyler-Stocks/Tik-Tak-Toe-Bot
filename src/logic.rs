@@ -1,8 +1,7 @@
-use crate::{board::Board, util::core::Turn};
+use crate::{board::board::Board, util::core::Turn};
 
 pub fn do_computer_turn(board: &mut Board, turn_number: u8) {
     match turn_number {
-        1 => do_turn_one(board, &board.start_player),
         2 => do_turn_two(board),
         3 => do_turn_three(board),
         4 => do_turn_four(board),

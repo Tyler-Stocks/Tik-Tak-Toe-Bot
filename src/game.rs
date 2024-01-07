@@ -8,9 +8,13 @@ pub mod stages {
     use console::Key::{Char, Enter};
     use console::Term;
 
-    use crate::board::Board;
+    use crate::board::board::Board;
+
     use crate::io::{clear_screen, get_binary_input, get_key, get_num, wait_for_enter};
-    use crate::util::core::{Side, Turn, TwoOptions};
+    use crate::util::{
+        core::{Side, Turn},
+        traits::TwoOptions,
+    };
 
     fn do_player_turn(term: &Term, board: &mut Board, side: Side) {
         let msg: &str =

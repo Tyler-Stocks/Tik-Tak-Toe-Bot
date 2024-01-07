@@ -1,73 +1,24 @@
 #![allow(dead_code)]
-use std::{
-    fmt::{Display, Formatter, Result},
-    u8,
-};
+
+use std::fmt::{Display, Formatter, Result};
 
 use crate::{
-    board::{TileState::Empty, TileState::Occupied},
-    util::core::{Side, Side::O, Side::X, Turn},
+    board::{
+        tile::Tile,
+        tile_state::{
+            TileState,
+            TileState::{Empty, Occupied},
+        },
+    },
+    util::core::{
+        Side,
+        Side::{O, X},
+        Turn,
+    },
 };
-
-/// The current state of the tile on the board
-#[derive(Eq, PartialEq, Copy, Clone)]
-pub enum TileState {
-    Occupied(Side),
-    Empty,
-}
-
-impl Display for TileState {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        match self {
-            Occupied(X) => write!(f, "State = Occupied(X)"),
-            Occupied(O) => write!(f, "State = Occupied(O)"),
-            Empty => write!(f, "State = Empty"),
-        }
-    }
-}
-
-impl TileState {
-    pub fn value(&self) -> u8 {
-        match self {
-            Empty => 0,
-            Occupied(X) => 1,
-            Occupied(O) => 2,
-        }
-    }
-}
-
-#[derive(Eq, PartialEq, Copy, Clone)]
-pub struct Tile {
-    id: u8,
-    state: TileState,
-}
-
-impl Display for Tile {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}, {}", self.id, self.state)
-    }
-}
-
-impl Tile {
-    pub fn new(id: u8) -> Tile {
-        if id > 9 {
-            panic!("Id {id} is too big. Must be less than 9.");
-        }
-
-        if id < 1 {
-            panic!("Id {id} is too small. Must be greater than 0.");
-        }
-
-        Tile {
-            id,
-            state: TileState::Empty,
-        }
-    }
-}
 
 #[derive(Eq, PartialEq, Copy, Clone)]
 pub struct Board {
-    pub start_player: Turn,
     pub top_left: Tile,
     pub top_middle: Tile,
     pub top_right: Tile,
@@ -80,11 +31,10 @@ pub struct Board {
 }
 
 impl Display for Board {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(
             f,
-            "Start Player: {:?}\n{} {} {}\n{} {} {}\n{} {} {}",
-            self.start_player,
+            "{} {} {}\n{} {} {}\n{} {} {}",
             self.top_left,
             self.top_middle,
             self.top_right,
@@ -100,9 +50,8 @@ impl Display for Board {
 
 impl Board {
     /// Creates a new tick tack toe board
-    pub fn new(start_player: Turn) -> Board {
+    pub fn new() -> Board {
         Board {
-            start_player,
             top_left: Tile::new(1),
             top_middle: Tile::new(2),
             top_right: Tile::new(3),

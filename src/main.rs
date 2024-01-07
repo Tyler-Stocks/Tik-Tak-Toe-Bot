@@ -1,6 +1,5 @@
 // ---------- Modules ---------- //
 mod board;
-mod err;
 mod game;
 mod io;
 mod logic;

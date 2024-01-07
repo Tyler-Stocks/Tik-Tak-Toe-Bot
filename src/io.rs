@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use crate::util::TwoOptions;
+use crate::util::traits::TwoOptions;
 use console::{Key, Term};
 use core::panic;
 use std::process::exit;
