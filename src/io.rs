@@ -2,7 +2,6 @@
 
 use crate::util::traits::TwoOptions;
 use console::{Key, Key::Enter, Term};
-use core::panic;
 use std::process::exit;
 
 /// Clears the terminal.
