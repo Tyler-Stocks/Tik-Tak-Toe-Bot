@@ -1,19 +1,18 @@
 pub mod stages {
-    use std::hash::Hasher;
-    use std::{
-        collections::hash_map::RandomState, hash::BuildHasher, process::exit, thread::sleep,
-        time::Duration,
+    use std::process::exit;
+
+    use console::{
+        Key::{Char, Enter},
+        Term,
     };
 
-    use console::Key::{Char, Enter};
-    use console::Term;
-
-    use crate::board::board::Board;
-
-    use crate::io::{clear_screen, get_binary_input, get_key, get_num, wait_for_enter};
-    use crate::util::{
-        core::{Side, Turn},
-        traits::TwoOptions,
+    use crate::{
+        board::board::Board,
+        io::{get_binary_input, get_key, get_num, wait_for_enter},
+        util::{
+            core::{Side, Turn},
+            random::calculate_random,
+        },
     };
 
     fn do_player_turn(term: &Term, board: &mut Board, side: Side) {
@@ -109,28 +108,6 @@ pub mod stages {
                 }
             }
         }
-    }
-
-    fn calculate_random<T: TwoOptions<Output = T> + PartialEq>(term: &Term, msg: [&str; 2]) -> T {
-        let random_seed: u64 = RandomState::new().build_hasher().finish();
-
-        let output: T = match random_seed % 2 == 0 {
-            true => T::option_one(),
-            false => T::option_two(),
-        };
-
-        clear_screen(term);
-
-        println!("Calculating... ");
-        sleep(Duration::from_secs_f64(1.5));
-
-        if output == T::option_one() {
-            println!("{}", msg[0])
-        } else {
-            println!("{}", msg[1])
-        }
-
-        output
     }
 
     pub fn game_loop(term: &Term) -> ! {

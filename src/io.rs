@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use crate::util::traits::TwoOptions;
-use console::{Key, Term};
+use console::{Key, Key::Enter, Term};
 use core::panic;
 use std::process::exit;
 
@@ -12,7 +12,7 @@ use std::process::exit;
 ///
 /// ### Panics
 ///     After five failed attempts to clear the terminal
-pub fn clear_screen(term: &Term) {
+pub fn cls(term: &Term) {
     let err_msg: &str = "Failed to clear the terminal after five attempts.";
 
     for _ in 0..5 {
@@ -32,7 +32,7 @@ pub fn clear_screen(term: &Term) {
 pub fn get_num(term: &Term, msg: &str) -> u8 {
     let mut user_input: char;
 
-    clear_screen(term);
+    cls(term);
 
     println!("{msg}");
 
@@ -87,7 +87,7 @@ pub fn get_key(term: &Term) -> Key {
 ///     * term: A referance to the terminal you are getting input from
 pub fn wait_for_enter(term: &Term) {
     loop {
-        if get_key(term) == Key::Enter {
+        if get_key(term) == Enter {
             break;
         }
     }
@@ -98,7 +98,7 @@ pub fn wait_for_enter(term: &Term) {
 /// ### Params
 ///     * term: A referance to the terminal you are getting input from
 fn confirm(term: &Term) -> bool {
-    clear_screen(term);
+    cls(term);
 
     println!("Are you sure (Y/N)?");
 
@@ -125,7 +125,7 @@ pub fn get_binary_input<T: TwoOptions<Output = T>>(
     keys: [char; 2],
     confirm_input: bool,
 ) -> T {
-    clear_screen(term);
+    cls(term);
 
     println!("{msg}");
 
