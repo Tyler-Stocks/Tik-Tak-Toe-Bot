@@ -13,7 +13,6 @@ use crate::{
     util::core::{
         Side,
         Side::{O, X},
-        Turn,
     },
 };
 
@@ -64,7 +63,7 @@ impl Board {
         }
     }
 
-    pub fn do_turn(&mut self, id: u8, side: Side) {
+    pub fn populate_tile(&mut self, id: u8, side: &Side) {
         match side {
             X => self.modify_tile_state(id, Occupied(X)),
             O => self.modify_tile_state(id, Occupied(O)),
