@@ -1,54 +1,21 @@
-use crate::{board::board::Board, util::core::Turn};
+use crate::{board::Board, util::core::Side};
+use rand::{thread_rng, Rng};
 
-pub fn do_computer_turn(board: &mut Board, turn_number: u8) {
-    match turn_number {
-        2 => do_turn_two(board),
-        3 => do_turn_three(board),
-        4 => do_turn_four(board),
-        5 => do_turn_five(board),
-        6 => do_turn_six(board),
-        7 => do_turn_seven(board),
-        8 => do_turn_eight(board),
-        9 => do_turn_nine(board),
-        _ => panic!("Turn number out of bounds. Must be in range 1 - 9."),
+pub fn do_move(board: &mut Board, side: Side) {
+    let legal_moves: Vec<u8> = board.legal_moves();
+
+    for legal_move in &legal_moves {
+        let mut board_copy: Board = board.clone();
+
+        board_copy.make_move(*legal_move, side);
+
+        if board_copy.is_winning() {
+            board.make_move(*legal_move, side);
+            return;
+        }
     }
-}
 
-fn do_turn_one(board: &mut Board, player: &Turn) {
-    match player {
-        Turn::You => todo!(),
-        Turn::Cpu => todo!(),
-    }
-}
+    let random_move: u8 = thread_rng().gen_range(0..legal_moves.len() - 1) as u8;
 
-fn do_turn_two(board: &mut Board) {
-    todo!();
-}
-
-fn do_turn_three(board: &mut Board) {
-    todo!();
-}
-
-fn do_turn_four(board: &mut Board) {
-    todo!();
-}
-
-fn do_turn_five(board: &mut Board) {
-    todo!();
-}
-
-fn do_turn_six(board: &mut Board) {
-    todo!();
-}
-
-fn do_turn_seven(board: &mut Board) {
-    todo!();
-}
-
-fn do_turn_eight(board: &mut Board) {
-    todo!();
-}
-
-fn do_turn_nine(board: &mut Board) {
-    todo!();
+    board.make_move(random_move, side)
 }

@@ -1,14 +1,12 @@
 use std::process::exit;
 
 use crate::{
-    board::board::Board,
-    io::{get_binary_input, get_key, get_num, wait_for_enter},
-    util::{
-        core::{
-            Side, Turn,
-            Turn::{Cpu, You},
-        },
-        random::calculate_random,
+    board::Board,
+    io::{get_binary_input, get_key, get_num},
+    random::get_random,
+    util::core::{
+        Side, Turn,
+        Turn::{Cpu, You},
     },
 };
 
@@ -17,6 +15,12 @@ use console::{
     Term,
 };
 
+/// Prompts the user to play a move, then plays the move
+///
+/// ### Params
+///     * term: The terminal you are reading input from
+///     * board: The tic tac toe board
+///     * side: The player side
 fn do_player_turn(term: &Term, board: &mut Board, side: &Side) {
     let msg: &str =
         "Choose a tile to place your piece (1 - 9). You cannot place a piece on an occupied tile.";
@@ -26,14 +30,22 @@ fn do_player_turn(term: &Term, board: &mut Board, side: &Side) {
     loop {
         player_move = get_num(term, msg);
 
-        if board.is_empty(player_move) {
-            board.populate_tile(player_move, side);
+        if board.tile_is_empty(player_move) {
+            board.make_move(player_move, *side);
             return;
         }
     }
 }
 
+/// Waits for the user to start
+///
+/// ### Params
+///     * term: The terminal you are reading from
 fn start(term: &Term) {
+    let start_msg: &str = "Press enter to start or 'q' to quit";
+
+    println!("{start_msg}");
+
     loop {
         match get_key(term) {
             Enter => break,
@@ -47,6 +59,10 @@ fn start(term: &Term) {
     }
 }
 
+/// Gets the starting configuration from the user
+///
+/// ### Params
+///     * term: The terminal you are reading from
 fn get_start_configuration(term: &Term) -> (Side, Turn) {
     let is_side_random_msg: &str = "Randomize starting side? (Y/N)";
     let is_start_random_msg: &str = "Randomize starting player? (Y/N)";
@@ -68,12 +84,12 @@ fn get_start_configuration(term: &Term) -> (Side, Turn) {
 
     loop {
         side = match get_binary_input(term, is_side_random_msg, ['y', 'n'], false) {
-            true => calculate_random(term, random_side_msgs),
+            true => get_random(term, random_side_msgs),
             false => get_binary_input(term, query_side_msg, ['x', 'o'], false),
         };
 
         start_player = match get_binary_input(term, is_start_random_msg, ['y', 'n'], false) {
-            true => calculate_random(term, random_start_player_msgs),
+            true => get_random(term, random_start_player_msgs),
             false => get_binary_input(term, query_start_player, ['y', 'n'], false),
         };
 
@@ -89,6 +105,11 @@ fn get_start_configuration(term: &Term) -> (Side, Turn) {
     }
 }
 
+/// Main turn loop
+///
+/// ### Params
+///     * term: The terminal you are reading from
+///     * start_config: The starting player and turn
 fn turn_loop(term: &Term, start_config: (Side, Turn)) {
     // Turn loop
     loop {
@@ -113,6 +134,10 @@ fn turn_loop(term: &Term, start_config: (Side, Turn)) {
     }
 }
 
+/// Main game loop
+///
+/// ### Params
+///     * term: The terminal you are reading from
 pub fn game_loop(term: &Term) -> ! {
     let mut start_config: (Side, Turn);
 
@@ -121,6 +146,6 @@ pub fn game_loop(term: &Term) -> ! {
     loop {
         start_config = get_start_configuration(term);
 
-        game_loop(term);
+        turn_loop(term, start_config);
     }
 }

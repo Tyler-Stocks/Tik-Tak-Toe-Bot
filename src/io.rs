@@ -2,7 +2,10 @@
 
 use crate::util::traits::TwoOptions;
 use console::{Key, Key::Enter, Term};
-use std::process::exit;
+use std::{
+    io::{Error, ErrorKind::Other},
+    process::exit,
+};
 
 /// Clears the terminal.
 ///
@@ -12,16 +15,18 @@ use std::process::exit;
 /// ### Panics
 ///     After five failed attempts to clear the terminal
 pub fn cls(term: &Term) {
-    let err_msg: &str = "Failed to clear the terminal after five attempts.";
+    let err_msg: &str = "Failed to clear the terminal after five attempts: ";
+
+    let mut error: Error = Error::new(Other, "Default Error Will Not Use");
 
     for _ in 0..5 {
         match term.clear_screen() {
             Ok(_) => return,
-            Err(_) => (),
+            Err(err) => error = err,
         }
     }
 
-    panic!("{err_msg}");
+    panic!("{err_msg}{error}.");
 }
 
 /// Gets a number from the terminal
@@ -52,31 +57,43 @@ pub fn get_num(term: &Term, msg: &str) -> u8 {
 /// ### Params
 ///   * term: A referance to the terminal you are reading from
 /// ### Panics
+///   * If the terminal cannot be read after five attempts.
 ///
 pub fn get_char(term: &Term) -> char {
-    let err_msg: &str = "Failed to read terminal after 5 attempts.";
+    let err_msg: &str = "Failed to read terminal after 5 attempts: ";
+
+    let mut error: Error = Error::new(Other, "Default Error Will Not use");
 
     for _ in 0..5 {
         match term.read_char() {
-            Ok(char) => char,
-            Err(_) => continue,
+            Ok(char) => return char,
+            Err(err) => error = err,
         };
     }
 
-    panic!("{err_msg}");
+    panic!("{err_msg}{error}.");
 }
 
+/// Gets a key from standard in
+///
+/// ### Params
+///     * term: The terminal you are reading from
+///
+/// ### Panics
+///     * If the terminal cannot be read after five attempts.
 pub fn get_key(term: &Term) -> Key {
-    let err_msg: &str = "Failed to read key after 5 attempts";
+    let err_msg: &str = "Failed to read key after 5 attempts: ";
+
+    let mut error: Error = Error::new(Other, "Default Error Will Not Use");
 
     for _ in 0..5 {
         match term.read_key() {
-            Ok(key) => key,
-            Err(_) => continue,
+            Ok(key) => return key,
+            Err(err) => error = err,
         };
     }
 
-    panic!("{err_msg}");
+    panic!("{err_msg}{error}.");
 }
 
 /// Waits for the enter key to be pressed on the keyboard.

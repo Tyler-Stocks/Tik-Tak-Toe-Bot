@@ -2,13 +2,17 @@ mod board;
 mod game;
 mod io;
 mod logic;
+mod random;
 mod util;
 
-use crate::game::game_loop;
-use console::Term;
+use crate::{board::Board, util::core::Side::X};
 
-pub fn main() -> ! {
-    println!("Welcome to my Tic Tak Toe bot! Press enter to continue and q to quit.");
+pub fn main() {
+    let mut board: Board = Board::new();
 
-    game_loop(&Term::buffered_stdout());
+    println!("{board}");
+
+    board.make_move(8, X);
+
+    println!("{board}");
 }
