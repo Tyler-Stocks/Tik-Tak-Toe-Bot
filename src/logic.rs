@@ -1,8 +1,14 @@
-use crate::{board::Board, util::core::Side};
+use console::Term;
+
+use crate::{board::Board, io::cls, util::core::Side};
 use rand::{thread_rng, Rng};
 
-pub fn do_move(board: &mut Board, side: Side) {
+pub fn do_computer_move(term: &Term, board: &mut Board, side: Side) {
+    let msg: &str = "Doing Computer Move...";
+
     let legal_moves: Vec<u8> = board.legal_moves();
+
+    cls(term);
 
     for legal_move in &legal_moves {
         let mut board_copy: Board = board.clone();

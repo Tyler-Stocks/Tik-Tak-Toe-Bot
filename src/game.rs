@@ -2,11 +2,13 @@ use std::process::exit;
 
 use crate::{
     board::Board,
-    io::{get_binary_input, get_key, get_num},
+    io::{cls, get_binary_input, get_key, get_num, wait_for_enter},
+    logic::do_computer_move,
     random::get_random,
     util::core::{
-        Side, Turn,
-        Turn::{Cpu, You},
+        Player,
+        Player::{Cpu, You},
+        Side,
     },
 };
 
@@ -21,20 +23,26 @@ use console::{
 ///     * term: The terminal you are reading input from
 ///     * board: The tic tac toe board
 ///     * side: The player side
-fn do_player_turn(term: &Term, board: &mut Board, side: &Side) {
+fn do_player_turn(term: &Term, board: &mut Board, side: Side) {
+    cls(term);
+
     let msg: &str =
         "Choose a tile to place your piece (1 - 9). You cannot place a piece on an occupied tile.";
 
     let mut player_move: u8;
 
+    println!("{}", board);
+
     loop {
         player_move = get_num(term, msg);
 
         if board.tile_is_empty(player_move) {
-            board.make_move(player_move, *side);
-            return;
+            board.make_move(player_move, side);
+            break;
         }
     }
+
+    cls(term);
 }
 
 /// Waits for the user to start
@@ -63,7 +71,7 @@ fn start(term: &Term) {
 ///
 /// ### Params
 ///     * term: The terminal you are reading from
-fn get_start_configuration(term: &Term) -> (Side, Turn) {
+fn get_start_configuration(term: &Term) -> (Side, Player) {
     let is_side_random_msg: &str = "Randomize starting side? (Y/N)";
     let is_start_random_msg: &str = "Randomize starting player? (Y/N)";
     let query_side_msg: &str = "Which side would you like to be (X/O)?";
@@ -80,7 +88,7 @@ fn get_start_configuration(term: &Term) -> (Side, Turn) {
     ];
 
     let mut side: Side;
-    let mut start_player: Turn;
+    let mut start_player: Player;
 
     loop {
         side = match get_binary_input(term, is_side_random_msg, ['y', 'n'], false) {
@@ -94,12 +102,12 @@ fn get_start_configuration(term: &Term) -> (Side, Turn) {
         };
 
         let confirm: String = format!(
-            "Are you happy with the start configuration (Y/N)? \nSide: {:?}, Start Player: {:?}",
+            "Are you happy with the start configuration (Y/N)? \nSide: {}, Start Player: {}",
             side, start_player
         );
 
         match get_binary_input(term, confirm.as_str(), ['y', 'n'], true) {
-            true => (side, start_player),
+            true => return (side, start_player),
             false => continue,
         };
     }
@@ -110,27 +118,48 @@ fn get_start_configuration(term: &Term) -> (Side, Turn) {
 /// ### Params
 ///     * term: The terminal you are reading from
 ///     * start_config: The starting player and turn
-fn turn_loop(term: &Term, start_config: (Side, Turn)) {
+pub fn turn_loop(term: &Term, board: &mut Board, start_config: (Side, Player)) -> Player {
+    let mut turn_counter: u8 = 1;
+
     // Turn loop
     loop {
-        let mut turn_counter: u8 = 1;
+        cls(term);
 
         match start_config.1 {
             You => {
                 if turn_counter % 2 != 0 {
-                    todo!()
+                    do_player_turn(term, board, start_config.0);
+
+                    if board.is_winning() {
+                        cls(term);
+                        return You;
+                    }
                 } else {
-                    todo!()
+                    do_computer_move(board, start_config.0.other());
+
+                    if board.is_winning() {
+                        return Cpu;
+                    }
                 }
             }
             Cpu => {
                 if turn_counter % 2 != 0 {
-                    todo!()
+                    do_computer_move(board, start_config.0.other());
+
+                    if board.is_winning() {
+                        return You;
+                    }
                 } else {
-                    todo!()
+                    if board.is_winning() {
+                        return Cpu;
+                    }
                 }
             }
         }
+
+        wait_for_enter(term);
+
+        turn_counter += 1;
     }
 }
 
@@ -138,14 +167,14 @@ fn turn_loop(term: &Term, start_config: (Side, Turn)) {
 ///
 /// ### Params
 ///     * term: The terminal you are reading from
-pub fn game_loop(term: &Term) -> ! {
-    let mut start_config: (Side, Turn);
+pub fn game_loop(term: Term, mut board: Board) -> ! {
+    let mut start_config: (Side, Player);
 
-    start(term);
+    start(&term);
 
     loop {
-        start_config = get_start_configuration(term);
+        start_config = get_start_configuration(&term);
 
-        turn_loop(term, start_config);
+        turn_loop(&term, &mut board, start_config);
     }
 }

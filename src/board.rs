@@ -12,7 +12,6 @@ pub struct Board {
     board: [u8; 9],
     moves: Vec<u8>,
 }
-
 impl Display for Board {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(
@@ -104,8 +103,6 @@ impl Board {
             panic!("Tile id: {id} is out of range.")
         }
 
-        id -= 1;
-
         return self.board[id as usize] == 0;
     }
 
@@ -114,13 +111,13 @@ impl Board {
             panic!("Tile id out of range (1-9).")
         }
 
-        self.moves.push(id);
-
         id -= 1;
 
+        self.moves.push(id);
+
         match side {
-            X => self.board[id as usize] == 1,
-            O => self.board[id as usize] == 2,
+            X => self.board[id as usize] = 1,
+            O => self.board[id as usize] = 2,
         };
     }
 

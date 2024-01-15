@@ -1,8 +1,8 @@
 use crate::util::core::{
+    Player,
+    Player::{Cpu, You},
     Side,
     Side::{O, X},
-    Turn,
-    Turn::{Cpu, You},
 };
 
 pub trait TwoOptions {
@@ -12,8 +12,8 @@ pub trait TwoOptions {
     fn option_two() -> Self::Output;
 }
 
-impl TwoOptions for Turn {
-    type Output = Turn;
+impl TwoOptions for Player {
+    type Output = Player;
 
     fn option_one() -> Self::Output {
         You

@@ -5,14 +5,18 @@ mod logic;
 mod random;
 mod util;
 
-use crate::{board::Board, util::core::Side::X};
+use console::Term;
+use util::core::{Side, Turn};
+
+use crate::{board::Board, game::turn_loop};
 
 pub fn main() {
+    let term: Term = Term::buffered_stdout();
     let mut board: Board = Board::new();
 
-    println!("{board}");
+    let start_config: (Side, Turn) = (Side::X, Turn::You);
 
-    board.make_move(8, X);
+    let winner: Turn = turn_loop(&term, &mut board, start_config);
 
-    println!("{board}");
+    println!("{winner}");
 }
