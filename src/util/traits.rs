@@ -1,8 +1,12 @@
-use crate::util::core::{
-    Player,
-    Player::{Cpu, You},
-    Side,
-    Side::{O, X},
+use crate::util::{
+    player::{
+        Player,
+        Player::{You, Cpu}
+    },
+    side::{
+        Side,
+        Side::{X, O}
+    }
 };
 
 pub trait TwoOptions {

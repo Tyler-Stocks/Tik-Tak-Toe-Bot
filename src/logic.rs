@@ -1,6 +1,11 @@
 use console::Term;
 
-use crate::{board::Board, io::cls, util::core::Side};
+use crate::{
+    board::Board,
+    io::cls,
+    util::side::Side
+};
+
 use rand::{thread_rng, Rng};
 
 pub fn do_computer_move(term: &Term, board: &mut Board, side: Side) {

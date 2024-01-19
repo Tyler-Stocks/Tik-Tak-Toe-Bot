@@ -1,8 +1,14 @@
 use std::fmt::Display;
 
-use crate::util::core::{
-    Side,
-    Side::{O, X},
+use crate::util::{
+    side::{
+        Side, 
+        Side::{X, O}
+    },
+    game_result::{
+        GameResult,
+        GameResult::{Unfinished, Win, Tie}
+    }
 };
 
 use std::fmt::{Formatter, Result};
@@ -98,20 +104,18 @@ impl Board {
         return true;
     }
 
-    pub fn tile_is_empty(&self, mut id: u8) -> bool {
-        if id > 9 || id == 0 {
+    pub fn tile_is_empty(&self, id: u8) -> bool {
+        if id > 9  {
             panic!("Tile id: {id} is out of range.")
         }
 
         return self.board[id as usize] == 0;
     }
 
-    pub fn make_move(&mut self, mut id: u8, side: Side) {
-        if id > 9 || id == 0 {
+    pub fn make_move(&mut self, id: u8, side: Side) {
+        if id > 9 { 
             panic!("Tile id out of range (1-9).")
         }
-
-        id -= 1;
 
         self.moves.push(id);
 
@@ -125,12 +129,10 @@ impl Board {
         self.moves[self.moves.len() - 1]
     }
 
-    pub fn tile_to_char(&self, mut id: u8) -> char {
-        if id > 9 || id == 0 {
+    pub fn tile_to_char(&self, id: u8) -> char {
+        if id > 9 {
             panic!("Tile id out of range (1-9).")
         }
-
-        id -= 1;
 
         match self.board[id as usize] {
             0 => '.',
@@ -140,36 +142,44 @@ impl Board {
         }
     }
 
-    pub fn is_winning(&self) -> bool {
+    pub fn get_game_state(&self) -> GameResult {
+        let mut is_final_move: bool = false;
+
+        if self.moves.len() == 9 {
+            is_final_move = true
+        }
+
         if self.moves.len() < 5 {
-            return false;
+            return Unfinished;
         }
 
         for row in self.get_rows().iter() {
             match row.iter().sum() {
-                3 => return true,
-                6 => return true,
-                _ => (),
-            }
+                3 => Win(X),
+                6 => Win(X),
+                _ => continue,
+            };
         }
 
         for col in self.get_cols().iter() {
             match col.iter().sum() {
-                3 => return true,
-                6 => return true,
-                _ => (),
-            }
+                3 => Win(X),
+                6 => Win(O),
+                _ => continue,
+            };
         }
 
         for diagonal in self.get_diagonals().iter() {
             match diagonal.iter().sum() {
-                3 => return true,
-                6 => return true,
-                _ => (),
-            }
+                3 => Win(X),
+                6 => Win(O),
+                _ => continue,
+            };
         }
 
-        return false;
+        if is_final_move { return Tie } 
+
+        Unfinished
     }
 
     pub fn legal_moves(&self) -> Vec<u8> {

@@ -17,12 +17,12 @@ pub fn get_random<T: TwoOptions<Output = T>>(term: &Term, msgs: [&str; 2]) -> T 
         1 => {
             println!("{}", msgs[0]);
             wait_for_enter(term);
-            return T::option_one();
+            T::option_one()
         }
         2 => {
             println!("{}", msgs[0]);
             wait_for_enter(term);
-            return T::option_two();
+            T::option_two()
         }
         _ => panic!("Random number out of range."),
     }

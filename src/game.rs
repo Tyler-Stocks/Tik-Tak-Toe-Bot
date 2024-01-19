@@ -2,14 +2,20 @@ use std::process::exit;
 
 use crate::{
     board::Board,
-    io::{cls, get_binary_input, get_key, get_num, wait_for_enter},
+    io::{cls, get_binary_input, get_key, get_num, wait_for_enter, confirm},
     logic::do_computer_move,
     random::get_random,
-    util::core::{
-        Player,
-        Player::{Cpu, You},
-        Side,
-    },
+    util::{
+        player::{
+            Player,
+            Player::{You, Cpu}
+        },
+        side::Side,
+        game_result::{
+            GameResult,
+            GameResult::Unfinished
+        }, start_config::StartConfig
+    }
 };
 
 use console::{
@@ -62,7 +68,7 @@ fn start(term: &Term) {
                     exit(0)
                 }
             }
-            _ => (),
+            _ => continue,
         }
     }
 }
@@ -71,7 +77,7 @@ fn start(term: &Term) {
 ///
 /// ### Params
 ///     * term: The terminal you are reading from
-fn get_start_configuration(term: &Term) -> (Side, Player) {
+fn get_start_configuration(term: &Term) -> StartConfig {
     let is_side_random_msg: &str = "Randomize starting side? (Y/N)";
     let is_start_random_msg: &str = "Randomize starting player? (Y/N)";
     let query_side_msg: &str = "Which side would you like to be (X/O)?";
@@ -87,29 +93,26 @@ fn get_start_configuration(term: &Term) -> (Side, Player) {
         "You start! Now you many have a chance",
     ];
 
-    let mut side: Side;
+    let mut start_side: Side;
     let mut start_player: Player;
 
     loop {
-        side = match get_binary_input(term, is_side_random_msg, ['y', 'n'], false) {
-            true => get_random(term, random_side_msgs),
-            false => get_binary_input(term, query_side_msg, ['x', 'o'], false),
-        };
+        match get_binary_input::<bool>(term, is_side_random_msg, ['y', 'n']) {
+            true => start_side = get_random(term, random_side_msgs),
+            false => start_side = get_binary_input(term, query_side_msg, ['y', 'n']) 
+        }
 
-        start_player = match get_binary_input(term, is_start_random_msg, ['y', 'n'], false) {
-            true => get_random(term, random_start_player_msgs),
-            false => get_binary_input(term, query_start_player, ['y', 'n'], false),
-        };
+        match get_binary_input::<bool>(term, is_start_random_msg, ['y', 'n']) {
+            true => start_player = get_random(term, random_side_msgs),
+            false => start_player = get_binary_input(term, query_start_player, ['x', 'o'])
+        }
 
-        let confirm: String = format!(
-            "Are you happy with the start configuration (Y/N)? \nSide: {}, Start Player: {}",
-            side, start_player
-        );
+        let confirm_msg: &str = 
+            format!("Are you happy with the start configuration (Y/N)? \nSide: {}, Start Player: {}", side, start_player).as_str();
 
-        match get_binary_input(term, confirm.as_str(), ['y', 'n'], true) {
-            true => return (side, start_player),
-            false => continue,
-        };
+        if confirm(term, confirm_msg) {
+            return StartConfig::new(start_side, start_player);
+        }
     }
 }
 
@@ -118,43 +121,33 @@ fn get_start_configuration(term: &Term) -> (Side, Player) {
 /// ### Params
 ///     * term: The terminal you are reading from
 ///     * start_config: The starting player and turn
-pub fn turn_loop(term: &Term, board: &mut Board, start_config: (Side, Player)) -> Player {
+pub fn turn_loop(term: &Term, board: &mut Board, start_config: StartConfig) -> GameResult {
     let mut turn_counter: u8 = 1;
 
     // Turn loop
     loop {
         cls(term);
 
-        match start_config.1 {
+        match start_config.start_player {
             You => {
                 if turn_counter % 2 != 0 {
-                    do_player_turn(term, board, start_config.0);
-
-                    if board.is_winning() {
-                        cls(term);
-                        return You;
-                    }
+                    do_player_turn(term, board, start_config.start_side);
                 } else {
-                    do_computer_move(board, start_config.0.other());
-
-                    if board.is_winning() {
-                        return Cpu;
-                    }
+                    do_computer_move(term, board, start_config.start_side.other());
                 }
             }
             Cpu => {
                 if turn_counter % 2 != 0 {
-                    do_computer_move(board, start_config.0.other());
-
-                    if board.is_winning() {
-                        return You;
-                    }
+                    do_computer_move(term, board, start_config.start_side.other());
                 } else {
-                    if board.is_winning() {
-                        return Cpu;
-                    }
-                }
+                    do_player_turn(term, board, start_config.start_side)
+                }  
             }
+        }
+
+        match board.get_game_state() {
+           Unfinished => (),
+           _          => return board.get_game_state()
         }
 
         wait_for_enter(term);
@@ -168,7 +161,7 @@ pub fn turn_loop(term: &Term, board: &mut Board, start_config: (Side, Player)) -
 /// ### Params
 ///     * term: The terminal you are reading from
 pub fn game_loop(term: Term, mut board: Board) -> ! {
-    let mut start_config: (Side, Player);
+    let mut start_config: StartConfig; 
 
     start(&term);
 

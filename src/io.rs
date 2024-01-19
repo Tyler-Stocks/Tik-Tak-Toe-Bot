@@ -43,11 +43,9 @@ pub fn get_num(term: &Term, msg: &str) -> u8 {
     loop {
         user_input = get_char(term);
 
-        if user_input.is_digit(10) {
-            match user_input.to_digit(10) {
-                Some(digit) => return digit as u8,
-                None => (),
-            }
+        match user_input.is_ascii_digit() {
+            true => {}
+            false => continue,
         }
     }
 }
@@ -113,10 +111,10 @@ pub fn wait_for_enter(term: &Term) {
 ///
 /// ### Params
 ///     * term: A referance to the terminal you are getting input from
-fn confirm(term: &Term) -> bool {
+pub fn confirm(term: &Term, msg: &str) -> bool {
     cls(term);
 
-    println!("Are you sure (Y/N)?");
+    println!("{msg}");
 
     loop {
         match get_char(term) {
@@ -139,7 +137,6 @@ pub fn get_binary_input<T: TwoOptions<Output = T>>(
     term: &Term,
     msg: &str,
     keys: [char; 2],
-    confirm_input: bool,
 ) -> T {
     cls(term);
 
@@ -149,16 +146,12 @@ pub fn get_binary_input<T: TwoOptions<Output = T>>(
         match get_char(term) {
             'q' => exit(0),
             k if k == keys[0] => {
-                if !confirm_input || confirm(term) {
-                    return T::option_one();
-                }
-            }
+                return T::option_one()
+            },
             k if k == keys[1] => {
-                if !confirm_input || confirm(term) {
-                    return T::option_two();
-                }
-            }
-            _ => (),
+                return T::option_two()
+            },
+            _ => continue
         }
     }
 }

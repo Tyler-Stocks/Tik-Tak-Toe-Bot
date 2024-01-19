@@ -1,7 +1,6 @@
 use std::fmt::{Display, Formatter, Result};
 
-use Player::{Cpu, You};
-use Side::{O, X};
+use Side::{X, O};
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Side {
@@ -23,21 +22,6 @@ impl Side {
         match self {
             X => O,
             O => X,
-        }
-    }
-}
-
-#[derive(Copy, Clone, Eq, PartialEq)]
-pub enum Player {
-    You,
-    Cpu,
-}
-
-impl Display for Player {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        match self {
-            You => write!(f, "Turn: You"),
-            Cpu => write!(f, "Turn: Cpu"),
         }
     }
 }
